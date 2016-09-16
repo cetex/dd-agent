@@ -23,6 +23,7 @@ from utils.service_discovery.config_stores import get_config_store
 
 EVENT_TYPE = 'docker'
 SERVICE_CHECK_NAME = 'docker.service_up'
+HEALTHCHECK_SERVICE_CHECK_NAME = 'docker.container_health'
 SIZE_REFRESH_RATE = 5  # Collect container sizes every 5 iterations of the check
 MAX_CGROUP_LISTING_RETRIES = 3
 CONTAINER_ID_RE = re.compile('[0-9a-f]{64}')
@@ -511,6 +512,21 @@ class DockerDaemon(AgentCheck):
                 m_func(
                     self, 'docker.container.size_rootfs', container['SizeRootFs'],
                     tags=tags)
+
+    def _send_container_health(self, containers_by_id):
+        for container in containers_by_id.itervalues():
+            health = container.get('Health', {})
+            status = AgentCheck.UNKNOWN
+            if health:
+                _health = health.get('Status', '')
+                if  _health == 'unhealthy':
+                    status = AgentCheck.CRITICAL
+                elif _health == 'healthy':
+                    status = AgentCheck.OK
+
+                tags = ['container:<BLAH>']
+                self.service_check(SERVICE_CHECK_NAME, status, tags=tags)
+
 
     def _report_image_size(self, images):
         for image in images:
