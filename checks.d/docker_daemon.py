@@ -513,20 +513,19 @@ class DockerDaemon(AgentCheck):
                     self, 'docker.container.size_rootfs', container['SizeRootFs'],
                     tags=tags)
 
-    def _send_container_health(self, containers_by_id):
+    def _send_container_healthcheck_sc(self, containers_by_id):
         for container in containers_by_id.itervalues():
             health = container.get('Health', {})
+            tags = self._get_tags(container, CONTAINER)
             status = AgentCheck.UNKNOWN
             if health:
                 _health = health.get('Status', '')
-                if  _health == 'unhealthy':
+                if _health == 'unhealthy':
                     status = AgentCheck.CRITICAL
                 elif _health == 'healthy':
                     status = AgentCheck.OK
 
-                tags = ['container:<BLAH>']
-                self.service_check(SERVICE_CHECK_NAME, status, tags=tags)
-
+                self.service_check(HEALTHCHECK_SERVICE_CHECK_NAME, status, tags=tags)
 
     def _report_image_size(self, images):
         for image in images:
