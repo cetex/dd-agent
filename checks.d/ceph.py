@@ -144,6 +144,49 @@ class Ceph(AgentCheck):
                 except KeyError:
                     osdinfo['client_io_rate'].update({'write_bytes_sec' : 0})
                     self._publish(osdinfo, self.gauge, ['client_io_rate', 'write_bytes_sec'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['recovering_keys_per_sec']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_keys_per_sec'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'recovering_keys_per_sec': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_keys_per_sec'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['num_keys_recovered']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'num_keys_recovered'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'num_keys_recovered': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'num_keys_recovered'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['recovering_objects_per_sec']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_objects_per_sec'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'recovering_objects_per_sec': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_objects_per_sec'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['num_objects_recovered']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'num_objects_recovered'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'num_objects_recovered': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'num_objects_recovered'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['recovering_bytes_per_sec']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_bytes_per_sec'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'recovering_bytes_per_sec': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'recovering_bytes_per_sec'], local_tags)
+
+                try:
+                    osdinfo['recovery_rate']['num_bytes_recovered']
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'num_bytes_recovered'], local_tags)
+                except KeyError:
+                    osdinfo['recovery_rate'].update({'num_bytes_recovered': 0})
+                    self._publish(osdinfo, self.gauge, ['recovery_rate', 'num_bytes_recovered'], local_tags)
+
         except KeyError:
             self.log.debug('Error retrieving osd_pool_stats metrics')
 
@@ -162,6 +205,9 @@ class Ceph(AgentCheck):
             for pgstate in pgstatus['pgs_by_state']:
                 s_name = pgstate['state_name'].replace("+", "_")
                 self.gauge(self.NAMESPACE + '.pgstate.' + s_name, pgstate['count'], tags)
+            self._publish(pgstatus, self.gauge, ['degraded_objects'], tags)
+            self._publish(pgstatus, self.gauge, ['misplaced_objects'], tags)
+
         except KeyError:
             self.log.debug('Error retrieving pgstatus metrics')
 
